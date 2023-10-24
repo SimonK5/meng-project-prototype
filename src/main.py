@@ -35,22 +35,18 @@ def draw(t, win):
 
 
 def rtree_metrics(num_updates, num_particles):
-    tree = RTree(Point(0, 0), Point(500, 500), max_per_level=3)
+    tree = RTree(Point(0, 0), Point(500, 500), max_per_level=4)
     particles = [Particle(random.random() * 500, random.random() * 500, 10, 10) for _ in range(num_particles)]
     start_time = time.time()
     update_freq = 30
-    for p in particles:
-        tree.insert(p)
 
     for i in range(num_updates):
-        # if i % update_freq == 0:
-        #     tree.clear()
+        tree.clear()
         # update_tree(tree, particles)
-        for j in range(len(particles)):
-            # particles[j].update(WIDTH, HEIGHT)
-            pass
-            # if i % update_freq == 0:
-            #     tree.insert(particles[j])
+        for j in range(num_particles):
+            particles[j].update(WIDTH, HEIGHT)
+            if i % update_freq == 0:
+                tree.insert(particles[j])
 
         for j in range(num_particles):
             rect = particles[j].rect
@@ -76,23 +72,22 @@ def linear_search_metrics(num_updates, num_particles):
 
 def visualize_rtree():
     win = GraphWin(width=WIDTH, height=HEIGHT, autoflush=False)
-    num_particles = 50
+
     tree = RTree(Point(0, 0), Point(500, 500), max_per_level=10)
+    num_particles = 50
     particles = [Particle(random.random() * 500, random.random() * 500, 10, 10) for _ in range(num_particles)]
     update_freq = 30
 
     num_updates = 10000
     for i in range(num_updates):
-
-        start_time = time.time()
-        # update_tree(tree, particles)
         if i % update_freq == 0:
             tree.clear()
-        for j in range(len(particles)):
+
+        start_time = time.time()
+        for j in range(num_particles):
             particles[j].update(WIDTH, HEIGHT)
             if i % update_freq == 0:
                 tree.insert(particles[j])
-
         print(f"update time: {time.time() - start_time}")
         rect1 = particles[0].rect
         close_objects = tree.search(
@@ -105,34 +100,33 @@ def visualize_rtree():
         # win.update()
 
 
-def get_metrics():
-    """
-    Generates 50 points running 10 iterations of (i * 5) moving particles, finding AOI of each particle.
-    """
-    num_iter = 10
-    points_in_plot = 100
+num_iter = 10
+points_in_plot = 100
 
-    rtree_results = []
-    linear_search_results = []
+rtree_results = []
+linear_search_results = []
 
-    # Run the experiments
-    for i in range(1, points_in_plot + 1):
-        print(i)
-        rtree_result = rtree_metrics(num_iter, i * 5)
-        linear_search_result = linear_search_metrics(num_iter, i * 5)
-        rtree_results.append(rtree_result)
-        linear_search_results.append(linear_search_result)
+# Run the experiments
+for i in range(1, points_in_plot + 1):
+    print(i)
+    rtree_result = rtree_metrics(num_iter, i * 5)
+    linear_search_result = linear_search_metrics(num_iter, i * 5)
+    rtree_results.append(rtree_result / num_iter)
+    linear_search_results.append(linear_search_result / num_iter)
 
+# Create a list of iterations for the x-axis
+iterations = [i * 5 for i in range(1, points_in_plot + 1)]
 
-    iterations = [i * 5 for i in range(1, points_in_plot + 1)]
+# Create the plot
+plt.plot(iterations, rtree_results, label='R-tree')
+plt.plot(iterations, linear_search_results, label='Linear Search')
 
-    plt.plot(iterations, rtree_results, label='R-tree')
-    plt.plot(iterations, linear_search_results, label='Linear Search')
+# Add labels and a legend
+plt.xlabel('Number of Particles')
+plt.ylabel('Average Time Per Iteration')
+plt.legend()
 
-    plt.xlabel('Number of Particles')
-    plt.ylabel('Average Time Per Iteration')
-    plt.legend()
+# Show the plot
+plt.show()
 
-    plt.show()
-
-get_metrics()
+# Explanation: generates 50 points running 10 iterations of (i * 5) moving particles, finding AOI of each particle.

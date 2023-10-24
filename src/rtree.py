@@ -144,7 +144,7 @@ class RTree:
 
         return node1, node2
 
-    def insert(self, obj, buffer=0):
+    def insert(self, obj, buffer=20):
         """
         Insert an object into the tree.
         :param obj: The object to be inserted.
@@ -215,5 +215,4 @@ class RTree:
 
     def draw(self, win):
         self._draw_node(self.root, win)
-
 
